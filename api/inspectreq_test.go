@@ -12,13 +12,13 @@ func TestHeadersHander(t *testing.T) {
 		w *httptest.ResponseRecorder
 		r *http.Request
 	}
-	createTestCase := func(headers map[string]string) args {
+	createTestCase := func(headers [][2]string) args {
 		r, err := http.NewRequest("GET", "/headers", nil)
 		if err != nil {
 			t.Fatal(err)
 		}
-		for k, v := range headers {
-			r.Header.Set(k, v)
+		for _, item := range headers {
+			r.Header.Add(item[0], item[1])
 		}
 		return args{httptest.NewRecorder(), r}
 	}
@@ -28,9 +28,19 @@ func TestHeadersHander(t *testing.T) {
 		result map[string]string
 	}{
 		{
-			"TestHeadersHander",
-			createTestCase(map[string]string{"X-TEST": "Test"}),
-			map[string]string{"X-TEST": "Test"},
+			"TestHeadersHander1",
+			createTestCase([][2]string{{"X-TEST", "Test"}}),
+			map[string]string{"X-Test": "Test"},
+		},
+		{
+			"TestHeadersHander2",
+			createTestCase([][2]string{{"X-TEST", "Test1"}, {"X-tEST", "Test2"}}),
+			map[string]string{"X-Test": "Test1,Test2"},
+		},
+		{
+			"TestHeadersHander3",
+			createTestCase([][2]string{{"X-TEST", "Test1"}, {"X-tEST", "Test2"}, {"X-tEST1", "Test3"}}),
+			map[string]string{"X-Test": "Test1,Test2", "X-Test1": "Test3"},
 		},
 	}
 	for _, tt := range tests {
@@ -40,13 +50,13 @@ func TestHeadersHander(t *testing.T) {
 				t.Errorf("handler returned wrong status code: got %v want %v",
 					status, http.StatusOK)
 			}
-			var body struct{ Headers http.Header }
+			var body struct{ Headers map[string]string }
 			json.Unmarshal(tt.args.w.Body.Bytes(), &body)
 			headers := body.Headers
 			for k, v := range tt.result {
-				if headers.Get(k) != v {
+				if headers[k] != v {
 					t.Errorf("handler returned wrong response json body: got {\"%v\": \"%v\"} want {\"%v\": \"%v\"}",
-						k, headers.Get(k), k, v)
+						k, headers[k], k, v)
 				}
 			}
 		})
