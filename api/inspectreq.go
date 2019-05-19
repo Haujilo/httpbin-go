@@ -27,3 +27,11 @@ func IPHander(w http.ResponseWriter, r *http.Request) {
 	ip, _, _ := net.SplitHostPort(r.RemoteAddr)
 	json.NewEncoder(w).Encode(JSON{Origin: ip})
 }
+
+func UserAgentHander(w http.ResponseWriter, r *http.Request) {
+	type JSON struct {
+		UserAgent string `json:"user-agent"`
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(JSON{UserAgent: r.Header.Get("User-Agent")})
+}
