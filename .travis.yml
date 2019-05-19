@@ -1,0 +1,18 @@
+language: go
+
+go:
+  - master
+
+services:
+  - docker
+
+before_install:
+  - docker pull alpine:latest
+  - docker pull golang:alpine
+
+script:
+  - docker build -t $DOCKER_USERNAME/httpbin .
+
+after_success:
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker push haujilo/httpbin
