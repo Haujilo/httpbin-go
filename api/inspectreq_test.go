@@ -95,8 +95,48 @@ func TestIPHander(t *testing.T) {
 			json.Unmarshal(tt.args.w.Body.Bytes(), &body)
 			origin := body.Origin
 			if origin != tt.result {
-				t.Errorf("handler returned wrong response json body: got {\"Origin\": \"%v\"} want {\"Origin\": \"%v\"}",
+				t.Errorf("handler returned wrong response json body: got {\"origin\": \"%v\"} want {\"origin\": \"%v\"}",
 					origin, tt.result)
+			}
+		})
+	}
+}
+
+func TestUserAgentHander(t *testing.T) {
+	type args struct {
+		w *httptest.ResponseRecorder
+		r *http.Request
+	}
+	createTestCase := func(userAgent string) args {
+		r, err := http.NewRequest("GET", "/ip", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		r.Header.Set("User-Agent", userAgent)
+		return args{httptest.NewRecorder(), r}
+	}
+	tests := []struct {
+		name   string
+		args   args
+		result string
+	}{
+		{"TestUserAgentHander", createTestCase("curl/7.54.0"), "curl/7.54.0"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			UserAgentHander(tt.args.w, tt.args.r)
+			if status := tt.args.w.Code; status != http.StatusOK {
+				t.Errorf("handler returned wrong status code: got %v want %v",
+					status, http.StatusOK)
+			}
+			var body struct {
+				UserAgent string `json:"user-agent"`
+			}
+			json.Unmarshal(tt.args.w.Body.Bytes(), &body)
+			userAgent := body.UserAgent
+			if userAgent != tt.result {
+				t.Errorf("handler returned wrong response json body: got {\"user-agent\": \"%v\"} want {\"user-agent\": \"%v\"}",
+					userAgent, tt.result)
 			}
 		})
 	}
