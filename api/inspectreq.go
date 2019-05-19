@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"net"
 	"net/http"
 	"strings"
 )
@@ -16,4 +17,13 @@ func HeadersHander(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(JSON{Headers: headers})
+}
+
+func IPHander(w http.ResponseWriter, r *http.Request) {
+	type JSON struct {
+		Origin string `json:"origin"`
+	}
+	w.Header().Set("Content-Type", "application/json")
+	ip, _, _ := net.SplitHostPort(r.RemoteAddr)
+	json.NewEncoder(w).Encode(JSON{Origin: ip})
 }

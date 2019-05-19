@@ -9,6 +9,7 @@ import (
 func route(mux *http.ServeMux) {
 	patterns := map[string]func(w http.ResponseWriter, r *http.Request){
 		"/headers": api.HeadersHander,
+		"/ip":      api.IPHander,
 	}
 
 	for endpoint, hander := range patterns {
