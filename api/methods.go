@@ -25,15 +25,16 @@ func getFullURL(r *http.Request) string {
 	return scheme + r.Host + r.RequestURI
 }
 
+type responseGETHandler struct {
+	Args    map[string]interface{} `json:"args"`
+	Headers map[string]string      `json:"headers"`
+	Origin  string                 `json:"origin"`
+	URL     string                 `json:"url"`
+}
+
 func GETHandler(w http.ResponseWriter, r *http.Request) {
-	type JSON struct {
-		Args    map[string]interface{} `json:"args"`
-		Headers map[string]string      `json:"headers"`
-		Origin  string                 `json:"origin"`
-		URL     string                 `json:"url"`
-	}
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(JSON{
+	json.NewEncoder(w).Encode(responseGETHandler{
 		Args:    fmtQueryString(r),
 		Headers: fmtHeaders(r),
 		Origin:  getIP(r),
