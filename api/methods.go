@@ -155,3 +155,11 @@ func PATCHHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	methodsHander(&w, r)
 }
+
+func DELETEHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "DELETE" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	methodsHander(&w, r)
+}

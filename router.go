@@ -8,10 +8,11 @@ import (
 
 func route(mux *http.ServeMux) {
 	patterns := map[string]func(w http.ResponseWriter, r *http.Request){
+		"/delete":     api.DELETEHandler,
 		"/get":        api.GETHandler,
+		"/patch":      api.PATCHHandler,
 		"/post":       api.POSTHandler,
 		"/put":        api.PUTHandler,
-		"/patch":      api.PATCHHandler,
 		"/headers":    api.HeadersHander,
 		"/ip":         api.IPHander,
 		"/user-agent": api.UserAgentHander,
