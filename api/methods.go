@@ -75,7 +75,7 @@ func getFullURL(r *http.Request) string {
 	return scheme + r.Host + r.RequestURI
 }
 
-type responseGETHandler struct {
+type methodsGETJSONResponse struct {
 	Args    map[string]interface{} `json:"args"`
 	Headers map[string]string      `json:"headers"`
 	Origin  string                 `json:"origin"`
@@ -83,8 +83,12 @@ type responseGETHandler struct {
 }
 
 func GETHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(responseGETHandler{
+	json.NewEncoder(w).Encode(methodsGETJSONResponse{
 		Args:    fmtQueryString(r),
 		Headers: fmtHeaders(r),
 		Origin:  getIP(r),
@@ -92,7 +96,7 @@ func GETHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-type responsePOSTHandler struct {
+type methodsJSONResponse struct {
 	Args    map[string]interface{} `json:"args"`
 	Data    string                 `json:"data"`
 	Files   map[string]interface{} `json:"files"`
@@ -103,8 +107,9 @@ type responsePOSTHandler struct {
 	URL     string                 `json:"url"`
 }
 
-func POSTHandler(w http.ResponseWriter, r *http.Request) {
-	response := responsePOSTHandler{
+func methodsHander(wp *http.ResponseWriter, r *http.Request) {
+	w := *wp
+	response := methodsJSONResponse{
 		Args:    fmtQueryString(r),
 		Headers: fmtHeaders(r),
 		Origin:  getIP(r),
@@ -125,4 +130,20 @@ func POSTHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
+}
+
+func POSTHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	methodsHander(&w, r)
+}
+
+func PUTHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "PUT" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	methodsHander(&w, r)
 }

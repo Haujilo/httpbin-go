@@ -34,12 +34,12 @@ func TestGETHandler(t *testing.T) {
 	tests := []struct {
 		name   string
 		args   args
-		result responseGETHandler
+		result methodsGETJSONResponse
 	}{
 		{
 			"TestGETHandler",
 			createTestCase("localhost:1121", "/get?a=1&a=2&b=3", "127.0.0.1:1121", [][2]string{{"X-TEST", "Test"}}),
-			responseGETHandler{
+			methodsGETJSONResponse{
 				Args: map[string]interface{}{
 					"a": []interface{}{"1", "2"},
 					"b": "3",
@@ -57,7 +57,7 @@ func TestGETHandler(t *testing.T) {
 				t.Errorf("handler returned wrong status code: got %v want %v",
 					status, http.StatusOK)
 			}
-			var body responseGETHandler
+			var body methodsGETJSONResponse
 			json.Unmarshal(tt.args.w.Body.Bytes(), &body)
 			for k, v := range tt.result.Args {
 				if !reflect.DeepEqual(body.Args[k], v) {
@@ -104,7 +104,7 @@ func TestPOSTHandler(t *testing.T) {
 	tests := []struct {
 		name   string
 		args   args
-		result responsePOSTHandler
+		result methodsJSONResponse
 	}{
 		{
 			"TestPOSTHandler1",
@@ -115,7 +115,7 @@ func TestPOSTHandler(t *testing.T) {
 				data.Add("test2", "test2")
 				return strings.NewReader(data.Encode())
 			}()),
-			responsePOSTHandler{
+			methodsJSONResponse{
 				Args: map[string]interface{}{
 					"a": []interface{}{"1", "2"},
 					"b": "3",
@@ -143,7 +143,7 @@ func TestPOSTHandler(t *testing.T) {
 				ww.Write([]byte("abc\n"))
 				return createTestCase("localhost:1121", "/post?a=1&a=2&b=3", "127.0.0.1:1121", [][2]string{{"Content-Type", w.FormDataContentType()}, {"X-TEST", "Test"}}, &body)
 			}(),
-			responsePOSTHandler{
+			methodsJSONResponse{
 				Args: map[string]interface{}{
 					"a": []interface{}{"1", "2"},
 					"b": "3",
@@ -163,7 +163,7 @@ func TestPOSTHandler(t *testing.T) {
 		{
 			"TestPOSTHandler3",
 			createTestCase("localhost:1121", "/post?a=1&a=2&b=3", "127.0.0.1:1121", [][2]string{{"Content-Type", "application/json"}, {"X-TEST", "Test"}}, strings.NewReader("{\"a\": \"1\"}")),
-			responsePOSTHandler{
+			methodsJSONResponse{
 				Args: map[string]interface{}{
 					"a": []interface{}{"1", "2"},
 					"b": "3",
@@ -177,7 +177,7 @@ func TestPOSTHandler(t *testing.T) {
 		{
 			"TestPOSTHandler4",
 			createTestCase("localhost:1121", "/post?a=1&a=2&b=3", "127.0.0.1:1121", [][2]string{{"X-TEST", "Test"}}, strings.NewReader("abcdefgh")),
-			responsePOSTHandler{
+			methodsJSONResponse{
 				Args: map[string]interface{}{
 					"a": []interface{}{"1", "2"},
 					"b": "3",
@@ -196,7 +196,7 @@ func TestPOSTHandler(t *testing.T) {
 				t.Errorf("handler returned wrong status code: got %v want %v",
 					status, http.StatusOK)
 			}
-			var body responsePOSTHandler
+			var body methodsJSONResponse
 			json.Unmarshal(tt.args.w.Body.Bytes(), &body)
 			if !reflect.DeepEqual(tt.result, body) {
 				t.Errorf("handler returned wrong response json body: got %v want %v",
