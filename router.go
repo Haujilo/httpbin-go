@@ -11,6 +11,7 @@ func route(mux *http.ServeMux) {
 		"/get":        api.GETHandler,
 		"/post":       api.POSTHandler,
 		"/put":        api.PUTHandler,
+		"/patch":      api.PATCHHandler,
 		"/headers":    api.HeadersHander,
 		"/ip":         api.IPHander,
 		"/user-agent": api.UserAgentHander,

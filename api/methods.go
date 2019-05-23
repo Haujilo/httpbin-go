@@ -147,3 +147,11 @@ func PUTHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	methodsHander(&w, r)
 }
+
+func PATCHHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "PATCH" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	methodsHander(&w, r)
+}
