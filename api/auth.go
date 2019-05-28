@@ -35,3 +35,26 @@ func BasicAuthHander(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusUnauthorized)
 
 }
+
+type bearerAuthJSONResponse struct {
+	Authenticated bool   `json:"authenticated"`
+	Token         string `json:"token"`
+}
+
+func BearerAuthHander(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/plain")
+
+	authorization := r.Header.Get("Authorization")
+	if strings.HasPrefix(authorization, "Bearer ") {
+		json.NewEncoder(w).Encode(bearerAuthJSONResponse{Authenticated: true, Token: authorization[7:]})
+		return
+	}
+
+	w.WriteHeader(http.StatusUnauthorized)
+
+}
