@@ -162,8 +162,12 @@ func digestAuth(r *http.Request, username, password string) (bool, error) {
 	ha1 := digest(info["username"]+":"+info["realm"]+":"+password, info["algorithm"])
 	var ha2 string
 	if info["qop"] == "auth-int" {
-		body, _ := ioutil.ReadAll(r.Body)
-		ha2 = digest(r.Method+":"+info["uri"]+":"+digest(string(body), info["algorithm"]), info["algorithm"])
+		body := ""
+		if r.Body != nil {
+			b, _ := ioutil.ReadAll(r.Body)
+			body = string(b)
+		}
+		ha2 = digest(r.Method+":"+info["uri"]+":"+digest(body, info["algorithm"]), info["algorithm"])
 	} else {
 		ha2 = digest(r.Method+":"+info["uri"], info["algorithm"])
 	}
