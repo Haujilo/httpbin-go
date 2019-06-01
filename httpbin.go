@@ -2,9 +2,15 @@ package main
 
 import (
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
+	"time"
 )
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
 
 func main() {
 	addr := "0.0.0.0:1121"

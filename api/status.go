@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 )
 
 func randomStatusSelect(choices map[int]int) int {
@@ -13,7 +12,6 @@ func randomStatusSelect(choices map[int]int) int {
 	for _, weight := range choices {
 		totalWeight += weight
 	}
-	rand.Seed(time.Now().UnixNano())
 	r := rand.Intn(totalWeight)
 	var rStatus int
 	for status, weight := range choices {

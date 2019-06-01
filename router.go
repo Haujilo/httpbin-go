@@ -15,6 +15,7 @@ func route(mux *http.ServeMux) {
 		"/put":                api.PUTHandler,
 		"/basic-auth/":        api.BasicAuthHander,
 		"/bearer":             api.BearerAuthHander,
+		"/digest-auth/":       api.DigestAuthHander,
 		"/hidden-basic-auth/": api.HiddenBasicAuthHander,
 		"/status/":            api.StatusHander,
 		"/headers":            api.HeadersHander,
