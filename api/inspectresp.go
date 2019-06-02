@@ -23,8 +23,11 @@ func ResponseHeadersHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	contentLength := len(tmp)
-	contentLength = contentLength + len(strconv.Itoa(contentLength))
-	payload["Content-Length"] = strconv.Itoa(contentLength)
+	size := contentLength + len(strconv.Itoa(contentLength)) + 1
+	if len(strconv.Itoa(size)) > len(strconv.Itoa(contentLength)) {
+		size++
+	}
+	payload["Content-Length"] = strconv.Itoa(size)
 
 	header := w.Header()
 	for k, v := range payload {
@@ -44,4 +47,5 @@ func ResponseHeadersHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write(body)
+	w.Write([]byte{'\n'})
 }
