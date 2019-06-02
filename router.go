@@ -21,6 +21,7 @@ func route(mux *http.ServeMux) {
 		"/headers":            api.HeadersHander,
 		"/ip":                 api.IPHander,
 		"/user-agent":         api.UserAgentHander,
+		"/response-headers":   api.ResponseHeadersHandler,
 	}
 
 	for endpoint, hander := range patterns {
