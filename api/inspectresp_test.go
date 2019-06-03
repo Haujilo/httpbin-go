@@ -43,3 +43,47 @@ func TestResponseHeadersHandler(t *testing.T) {
 		})
 	}
 }
+
+func TestCacheHandler(t *testing.T) {
+	type args struct {
+		w *httptest.ResponseRecorder
+		r *http.Request
+	}
+	createTestCase := func(since, match string) args {
+		r, err := http.NewRequest("GET", "/cache", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if since != "" {
+			r.Header.Set("If-Modified-Since", since)
+		}
+		if match != "" {
+			r.Header.Set("If-None-Match", match)
+		}
+		return args{httptest.NewRecorder(), r}
+	}
+	tests := []struct {
+		name   string
+		args   args
+		result int
+	}{
+		{"TestCacheHandler1", createTestCase("", ""), 200},
+		{"TestCacheHandler2", createTestCase("Feb 17 00:00:00 2019 GMT", ""), 304},
+		{"TestCacheHandler3", createTestCase("", "718508b3fd063ea9a0c081cc4f059ea9"), 304},
+		{"TestCacheHandler4", createTestCase("Feb 17 00:00:00 2019 GMT", "718508b3fd063ea9a0c081cc4f059ea9"), 304},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			CacheHandler(tt.args.w, tt.args.r)
+			if status := tt.args.w.Code; status != tt.result {
+				t.Errorf("handler returned wrong status code: got %v want %v",
+					status, http.StatusOK)
+			}
+			if status := tt.args.w.Code; status == http.StatusOK {
+				if tt.args.w.Header().Get("Last-Modified") == "" || tt.args.w.Header()["ETag"][0] == "" {
+					t.Errorf("handler lost header")
+				}
+			}
+		})
+	}
+}
