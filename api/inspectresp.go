@@ -2,9 +2,23 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 )
+
+func CacheHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Header.Get("If-Modified-Since") == "" && r.Header.Get("If-None-Match") == "" {
+		now := time.Now().UTC()
+		w.Header().Set("Last-Modified", now.Format(http.TimeFormat))
+		w.Header()["ETag"] = []string{digest(fmt.Sprint(time.Now().UnixNano()), "MD5")}
+		GETHandler(w, r)
+		return
+	}
+
+	w.WriteHeader(http.StatusNotModified)
+}
 
 func ResponseHeadersHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" && r.Method != "POST" {
