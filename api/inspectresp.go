@@ -5,10 +5,16 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
 func CacheHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
 	if r.Header.Get("If-Modified-Since") == "" && r.Header.Get("If-None-Match") == "" {
 		now := time.Now().UTC()
 		w.Header().Set("Last-Modified", now.Format(http.TimeFormat))
@@ -18,6 +24,41 @@ func CacheHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNotModified)
+}
+
+func ETagHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	params := strings.Split(r.URL.Path, "/")
+	if len(params) != 3 {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	etag := params[2]
+	ifNoneMatch := r.Header.Get("If-None-Match")
+	ifMatch := r.Header.Get("If-Match")
+
+	if ifNoneMatch != "" {
+		if etag == ifNoneMatch || ifNoneMatch == "*" {
+			w.WriteHeader(http.StatusNotModified)
+			w.Header()["ETag"] = []string{etag}
+			return
+		}
+	} else {
+		if ifMatch != "" {
+			if etag != ifMatch && ifMatch != "*" {
+				w.WriteHeader(http.StatusPreconditionFailed)
+				return
+			}
+		}
+	}
+
+	w.Header()["ETag"] = []string{etag}
+	GETHandler(w, r)
 }
 
 func ResponseHeadersHandler(w http.ResponseWriter, r *http.Request) {

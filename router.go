@@ -22,6 +22,7 @@ func route(mux *http.ServeMux) {
 		"/ip":                 api.IPHander,
 		"/user-agent":         api.UserAgentHander,
 		"/cache":              api.CacheHandler,
+		"/etag/":              api.ETagHandler,
 		"/response-headers":   api.ResponseHeadersHandler,
 	}
 
