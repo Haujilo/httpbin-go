@@ -77,7 +77,7 @@ func TestCacheHandler(t *testing.T) {
 			CacheHandler(tt.args.w, tt.args.r)
 			if status := tt.args.w.Code; status != tt.result {
 				t.Errorf("handler returned wrong status code: got %v want %v",
-					status, http.StatusOK)
+					status, tt.result)
 			}
 			if status := tt.args.w.Code; status == http.StatusOK {
 				if tt.args.w.Header().Get("Last-Modified") == "" || tt.args.w.Header()["ETag"][0] == "" {
@@ -85,5 +85,52 @@ func TestCacheHandler(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestETagHandler(t *testing.T) {
+	type args struct {
+		w *httptest.ResponseRecorder
+		r *http.Request
+	}
+	createTestCase := func(etag, match, notMatch string) args {
+		r, err := http.NewRequest("GET", "/etag/"+etag, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if notMatch != "" {
+			r.Header.Set("If-None-Match", notMatch)
+		}
+		if match != "" {
+			r.Header.Set("If-Match", match)
+		}
+		return args{httptest.NewRecorder(), r}
+	}
+	tests := []struct {
+		name   string
+		args   args
+		result int
+	}{
+		{"TestETagHandler1", createTestCase("718508b3fd063ea9a0c081cc4f059ea9", "", ""), 200},
+		{"TestETagHandler2", createTestCase("718508b3fd063ea9a0c081cc4f059ea9", "", "*"), 304},
+		{"TestETagHandler3", createTestCase("718508b3fd063ea9a0c081cc4f059ea9", "", "718508b3fd063ea9a0c081cc4f059ea9"), 304},
+		{"TestETagHandler4", createTestCase("718508b3fd063ea9a0c081cc4f059ea9", "", "718508b3fd063ea9a0c081cc4f095ea9"), 200},
+		{"TestETagHandler5", createTestCase("718508b3fd063ea9a0c081cc4f059ea9", "718508b3fd063ea9a0c081cc4f095ea9", ""), 412},
+		{"TestETagHandler6", createTestCase("718508b3fd063ea9a0c081cc4f059ea9", "*", ""), 200},
+		{"TestETagHandler7", createTestCase("718508b3fd063ea9a0c081cc4f059ea9", "718508b3fd063ea9a0c081cc4f095ea9", "718508b3fd063ea9a0c081cc4f059ea9"), 304},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ETagHandler(tt.args.w, tt.args.r)
+		})
+		if status := tt.args.w.Code; status != tt.result {
+			t.Errorf("handler returned wrong status code: got %v want %v",
+				status, tt.result)
+		}
+		if status := tt.args.w.Code; status == http.StatusOK || status == http.StatusNotModified {
+			if tt.args.w.Header()["ETag"][0] == "" {
+				t.Errorf("handler lost header")
+			}
+		}
 	}
 }
