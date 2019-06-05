@@ -26,6 +26,28 @@ func CacheHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotModified)
 }
 
+func CacheControlHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	params := strings.Split(r.URL.Path, "/")
+	if len(params) != 3 {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	maxAge, err := strconv.Atoi(params[2])
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("cache-control", fmt.Sprintf("public, max-age=%d", maxAge))
+	GETHandler(w, r)
+}
+
 func ETagHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
