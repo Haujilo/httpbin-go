@@ -134,3 +134,37 @@ func TestETagHandler(t *testing.T) {
 		}
 	}
 }
+
+func TestCacheControlHandler(t *testing.T) {
+	type args struct {
+		w *httptest.ResponseRecorder
+		r *http.Request
+	}
+	createTestCase := func(value string) args {
+		r, err := http.NewRequest("GET", "/cache/"+value, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return args{httptest.NewRecorder(), r}
+	}
+	tests := []struct {
+		name   string
+		args   args
+		result string
+	}{
+		{"TestCacheControlHandler1", createTestCase("100"), "public, max-age=100"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			CacheControlHandler(tt.args.w, tt.args.r)
+		})
+		if status := tt.args.w.Code; status != http.StatusOK {
+			t.Errorf("handler returned wrong status code: got %v want %v",
+				status, http.StatusOK)
+		}
+		if tt.args.w.Header().Get("cache-control") != tt.result {
+			t.Errorf("handler returned wrong header: got %v want %v",
+				tt.args.w.Header().Get("cache-control"), tt.result)
+		}
+	}
+}
