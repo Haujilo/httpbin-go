@@ -1,6 +1,7 @@
 package api
 
 import (
+	"compress/flate"
 	"compress/gzip"
 	"encoding/json"
 	"net/http"
@@ -129,6 +130,38 @@ func GZipHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writer := gzip.NewWriter(w)
+	_, err = writer.Write(content)
+	defer writer.Close()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+}
+
+type deflateJSONResponse struct {
+	Deflated bool              `json:"deflated"`
+	Headers  map[string]string `json:"headers"`
+	Method   string            `json:"method"`
+	Origin   string            `json:"origin"`
+}
+
+func DeflateHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	w.Header().Set("Content-Encoding", "deflate")
+	w.Header().Set("Content-Type", "application/json")
+
+	content, err := json.Marshal(deflateJSONResponse{true, fmtHeaders(r), r.Method, getIP(r)})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
+	writer, err := flate.NewWriter(w, flate.BestCompression)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
 	_, err = writer.Write(content)
 	defer writer.Close()
 	if err != nil {
