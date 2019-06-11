@@ -87,7 +87,7 @@ func TestXMLHandler(t *testing.T) {
 		r *http.Request
 	}
 	createTestCase := func() args {
-		r, err := http.NewRequest("GET", "/json", nil)
+		r, err := http.NewRequest("GET", "/xml", nil)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -103,6 +103,43 @@ func TestXMLHandler(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			XMLHandler(tt.args.w, tt.args.r)
+			if status := tt.args.w.Code; status != http.StatusOK {
+				t.Errorf("handler returned wrong status code: got %v want %v",
+					status, http.StatusOK)
+			}
+			body, err := ioutil.ReadAll(tt.args.w.Body)
+			if err != nil {
+				t.Error(err)
+			}
+			if string(body) != tt.result {
+				t.Errorf("http body error, got %v want %v", tt.result, body)
+			}
+		})
+	}
+}
+
+func TestHTMLHandler(t *testing.T) {
+	type args struct {
+		w *httptest.ResponseRecorder
+		r *http.Request
+	}
+	createTestCase := func() args {
+		r, err := http.NewRequest("GET", "/html", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return args{httptest.NewRecorder(), r}
+	}
+	tests := []struct {
+		name   string
+		args   args
+		result string
+	}{
+		{"TestHTMLHandler1", createTestCase(), htmlBody},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			HTMLHandler(tt.args.w, tt.args.r)
 			if status := tt.args.w.Code; status != http.StatusOK {
 				t.Errorf("handler returned wrong status code: got %v want %v",
 					status, http.StatusOK)
