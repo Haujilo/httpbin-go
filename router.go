@@ -25,6 +25,7 @@ func route(mux *http.ServeMux) {
 		"/cache/":             api.CacheControlHandler,
 		"/etag/":              api.ETagHandler,
 		"/response-headers":   api.ResponseHeadersHandler,
+		"/gzip":               api.GZipHandler,
 		"/html":               api.HTMLHandler,
 		"/json":               api.JsonHandler,
 		"/robots.txt":         api.RobotTxtHandler,

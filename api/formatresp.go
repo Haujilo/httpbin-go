@@ -1,6 +1,10 @@
 package api
 
-import "net/http"
+import (
+	"compress/gzip"
+	"encoding/json"
+	"net/http"
+)
 
 const robotTxt = `User-agent: *
 Disallow: /deny
@@ -102,4 +106,32 @@ func HTMLHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "text/html")
 	w.Write([]byte(htmlBody))
+}
+
+type gzipJSONResponse struct {
+	GZipped bool              `json:"gzipped"`
+	Headers map[string]string `json:"headers"`
+	Method  string            `json:"method"`
+	Origin  string            `json:"origin"`
+}
+
+func GZipHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	w.Header().Set("Content-Encoding", "gzip")
+	w.Header().Set("Content-Type", "application/json")
+
+	content, err := json.Marshal(gzipJSONResponse{true, fmtHeaders(r), r.Method, getIP(r)})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
+	writer := gzip.NewWriter(w)
+	_, err = writer.Write(content)
+	defer writer.Close()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }
