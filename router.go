@@ -25,6 +25,7 @@ func route(mux *http.ServeMux) {
 		"/cache/":             api.CacheControlHandler,
 		"/etag/":              api.ETagHandler,
 		"/response-headers":   api.ResponseHeadersHandler,
+		"/robots.txt":         api.RobotTxtHandler,
 	}
 
 	for endpoint, hander := range patterns {
