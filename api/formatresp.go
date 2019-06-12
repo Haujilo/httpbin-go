@@ -177,3 +177,24 @@ func UTF8Handler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Write([]byte(utf8Demo))
 }
+
+const angryAscii = `          .-''''''-.
+        .' _      _ '.
+       /   O      O   \\
+      :                :
+      |                |
+      :       __       :
+       \  .-"` + "`  `" + `"-.  /
+        '.          .'
+          '-......-'
+     YOU SHOULDN'T BE HERE
+`
+
+func DenyHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	w.Header().Set("Content-Type", "text/plain")
+	w.Write([]byte(angryAscii))
+}
