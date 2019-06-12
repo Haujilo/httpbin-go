@@ -26,6 +26,7 @@ func route(mux *http.ServeMux) {
 		"/etag/":              api.ETagHandler,
 		"/response-headers":   api.ResponseHeadersHandler,
 		"/deflate":            api.DeflateHandler,
+		"/encoding/utf8":      api.UTF8Handler,
 		"/gzip":               api.GZipHandler,
 		"/html":               api.HTMLHandler,
 		"/json":               api.JsonHandler,
