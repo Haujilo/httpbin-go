@@ -33,6 +33,7 @@ func route(mux *http.ServeMux) {
 		"/json":               api.JsonHandler,
 		"/robots.txt":         api.RobotTxtHandler,
 		"/xml":                api.XMLHandler,
+		"/absolute-redirect/": api.AbsoluteRedirectHandler,
 	}
 
 	for endpoint, hander := range patterns {
